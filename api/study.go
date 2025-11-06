@@ -6,6 +6,11 @@ import (
 	"net/url"
 )
 
+const (
+	StudyStudentSexMan   = "man"
+	StudyStudentSexWoman = "woman"
+)
+
 type StudyErrorResult struct {
 	Message string
 }
