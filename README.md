@@ -2,7 +2,7 @@
 
 ## Project stack
 - Go
-- github.com/go-telegram/bot
+- gopkg.in/telebot.v3`
 - github.com/joho/godotenv
 
 ## Api
