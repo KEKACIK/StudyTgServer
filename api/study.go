@@ -141,3 +141,14 @@ func (s *StudyApiServer) Delete(id int64) error {
 	_, err := requestDelete(url.String())
 	return err
 }
+
+func FormatSexToRu(sex string) string {
+	switch sex {
+	case StudyStudentSexMan:
+		return "Мужской"
+	case StudyStudentSexWoman:
+		return "Женский"
+	default:
+		return "Не определен"
+	}
+}

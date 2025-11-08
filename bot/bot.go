@@ -1,7 +1,8 @@
-package telegram_bot
+package bot
 
 import (
 	"StudyTgServer/api"
+	"fmt"
 	"time"
 
 	"gopkg.in/telebot.v3"
@@ -9,18 +10,10 @@ import (
 
 type States string
 
-const (
-	StudentCreateName   States = "student_create_name"
-	StudentCreateSex    States = "student_create_sex"
-	StudentCreateAge    States = "student_create_age"
-	StudentCreateCourse States = "student_create_course"
-
-	StudentGet States = "student_get"
-)
-
 type Bot struct {
 	*telebot.Bot
 	states map[int64]States
+	data   map[int64]api.StudyApiStudent
 	api    *api.StudyApiServer
 }
 
@@ -36,10 +29,16 @@ func NewBot(token string, study_api *api.StudyApiServer) (*Bot, error) {
 	bot := Bot{
 		Bot:    b,
 		states: make(map[int64]States),
+		data:   make(map[int64]api.StudyApiStudent),
 		api:    study_api,
 	}
-
-	bot.RegisterHandlers(study_api)
+	bot.SetCommands()
+	bot.RegisterHandlers()
 
 	return &bot, nil
+}
+
+func (b *Bot) Start() {
+	fmt.Println("Запуск бота")
+	b.Bot.Start()
 }
