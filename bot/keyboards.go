@@ -25,3 +25,20 @@ func createSexKeyboard() *telebot.ReplyMarkup {
 	}
 	return keyboard
 }
+func deleteSuccessKeyboard() *telebot.ReplyMarkup {
+	keyboard := &telebot.ReplyMarkup{
+		InlineKeyboard: [][]telebot.InlineButton{
+			{
+				telebot.InlineButton{
+					Text:   "Удалить",
+					Unique: "delete_yes",
+				},
+				telebot.InlineButton{
+					Text:   "Отмена",
+					Unique: "delete_no",
+				},
+			},
+		},
+	}
+	return keyboard
+}

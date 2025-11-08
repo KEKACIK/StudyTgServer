@@ -17,6 +17,8 @@ func (b *Bot) RegisterHandlers() {
 	b.Handle("/get_all", b.getAllHandler)
 	b.Handle("/update", b.updateHandler)
 	b.Handle("/delete", b.deleteHandler)
+	b.Handle(&telebot.Btn{Unique: "delete_yes"}, b.deleteYesHandler)
+	b.Handle(&telebot.Btn{Unique: "delete_no"}, b.deleteNoHandler)
 	b.Handle(telebot.OnText, b.textHandler)
 }
 
@@ -37,10 +39,12 @@ func (b *Bot) textHandler(c telebot.Context) error {
 	case StudentCreateCourseState:
 		return b.createCourseHandler(c)
 	// Get handlers
-	case StudentGetId:
+	case StudentGetIdState:
 		return b.getIdHandler(c)
+	// Delete handlers
+	case StudentDeleteIdState:
+		return b.deleteIdHandler(c)
 	}
-
 	return nil
 }
 
@@ -51,7 +55,7 @@ func (b *Bot) startHandler(c telebot.Context) error {
 		utils.MultiLine(
 			"Добро пожаловать в <b>StudyTgBot</b>",
 			"",
-			"Вот список комманд для использования бота",
+			"Вот список команд для использования бота",
 			"/start - Запустить бота",
 			"/create - Добавить нового студента",
 			"/get - Получить студента по ID",
@@ -125,7 +129,7 @@ func (b *Bot) createSexHandler(c telebot.Context) error {
 
 	if studentSex != "man" && studentSex != "woman" {
 		return c.Send(
-			"Произошла ошибка, обратитесь в Тех. Поддержку",
+			"Произошла ошибка, обратитесь в тех. Поддержку",
 			&telebot.SendOptions{
 				DisableWebPagePreview: false,
 				ParseMode:             telebot.ModeHTML,
@@ -252,11 +256,11 @@ func (b *Bot) createCourseHandler(c telebot.Context) error {
 // COMMAND GET
 
 const (
-	StudentGetId States = "student_get_id"
+	StudentGetIdState States = "student_get_id"
 )
 
 func (b *Bot) getHandler(c telebot.Context) error {
-	b.states[c.Chat().ID] = StudentGetId
+	b.states[c.Chat().ID] = StudentGetIdState
 	return c.Send(
 		utils.MultiLine(
 			"Получение студента по ID",
@@ -284,7 +288,7 @@ func (b *Bot) getIdHandler(c telebot.Context) error {
 	student, err := b.api.Get(int64(studentID))
 	if err != nil {
 		c.Send(
-			"Произошла ошибка, обратитесь в Тех. Поддержку",
+			"Произошла ошибка, обратитесь в тех. Поддержку",
 			&telebot.SendOptions{
 				DisableWebPagePreview: false,
 				ParseMode:             telebot.ModeHTML,
@@ -315,7 +319,7 @@ func (b *Bot) getAllHandler(c telebot.Context) error {
 	students, err := b.api.GetAll()
 	if err != nil {
 		c.Send(
-			"Произошла ошибка, обратитесь в Тех. Поддержку",
+			"Произошла ошибка, обратитесь в тех. Поддержку",
 			&telebot.SendOptions{
 				DisableWebPagePreview: false,
 				ParseMode:             telebot.ModeHTML,
@@ -361,9 +365,91 @@ func (b *Bot) updateHandler(c telebot.Context) error {
 // COMMAND DELETE
 
 const (
-	StudentDeleteId States = "student_delete_id"
+	StudentDeleteIdState States = "student_delete_id"
 )
 
 func (b *Bot) deleteHandler(c telebot.Context) error {
+	b.states[c.Chat().ID] = StudentDeleteIdState
+	b.data[c.Chat().ID] = api.StudyApiStudent{}
+	return c.Send(
+		utils.MultiLine(
+			"Удаление студента по ID",
+			"",
+			"Пришлите ID студента",
+		),
+		&telebot.SendOptions{
+			DisableWebPagePreview: false,
+			ParseMode:             telebot.ModeHTML,
+		},
+	)
+}
+
+func (b *Bot) deleteIdHandler(c telebot.Context) error {
+	studentID, err := strconv.Atoi(c.Text())
+	if err != nil {
+		return c.Send(
+			"ID должен быть числовым, отправьте ещё раз",
+			&telebot.SendOptions{
+				DisableWebPagePreview: false,
+				ParseMode:             telebot.ModeHTML,
+			},
+		)
+	}
+	student, err := b.api.Get(int64(studentID))
+	if err != nil {
+		c.Send(
+			"Произошла ошибка, обратитесь в тех. Поддержку",
+			&telebot.SendOptions{
+				DisableWebPagePreview: false,
+				ParseMode:             telebot.ModeHTML,
+			},
+		)
+		return err
+	}
+	b.data[c.Chat().ID] = *student
+	c.Send(
+		utils.MultiLine(
+			fmt.Sprintf("ID: <b><i>%d</i></b>", student.ID),
+			fmt.Sprintf("Имя: <b><i>%s</i></b>", student.Name),
+			fmt.Sprintf("Пол: <b><i>%s</i></b>", api.FormatSexToRu(student.Sex)),
+			fmt.Sprintf("Возраст: <b><i>%d</i></b>", student.Age),
+			fmt.Sprintf("Курс: <b><i>%d</i></b>", student.Course),
+			"",
+			"Вы уверены, что хотите удалить?",
+		),
+		&telebot.SendOptions{
+			DisableWebPagePreview: false,
+			ParseMode:             telebot.ModeHTML,
+			ReplyMarkup:           deleteSuccessKeyboard(),
+		},
+	)
 	return nil
+}
+
+func (b *Bot) deleteYesHandler(c telebot.Context) error {
+	student := b.data[c.Chat().ID]
+	err := b.api.Delete(student.ID)
+	if err != nil {
+		c.Send(
+			"Произошла ошибка, обратитесь в тех. Поддержку",
+			&telebot.SendOptions{
+				DisableWebPagePreview: false,
+				ParseMode:             telebot.ModeHTML,
+			},
+		)
+		return err
+	}
+	b.clear(c.Chat().ID)
+	return c.Send(
+		fmt.Sprintf("Студент с ID=%d успешно удален", student.ID),
+		&telebot.SendOptions{
+			DisableWebPagePreview: false,
+			ParseMode:             telebot.ModeHTML,
+		},
+	)
+}
+
+func (b *Bot) deleteNoHandler(c telebot.Context) error {
+	b.clear(c.Chat().ID)
+	return c.Delete()
 }
