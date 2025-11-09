@@ -6,18 +6,18 @@ import (
 	"gopkg.in/telebot.v3"
 )
 
-func createSexKeyboard() *telebot.ReplyMarkup {
+func createSexKeyboard(key string) *telebot.ReplyMarkup {
 	keyboard := &telebot.ReplyMarkup{
 		InlineKeyboard: [][]telebot.InlineButton{
 			{
 				telebot.InlineButton{
 					Text:   "Мужской",
-					Unique: "create_sex",
+					Unique: key,
 					Data:   api.StudyStudentSexMan,
 				},
 				telebot.InlineButton{
 					Text:   "Женский",
-					Unique: "create_sex",
+					Unique: key,
 					Data:   api.StudyStudentSexWoman,
 				},
 			},
@@ -25,6 +25,37 @@ func createSexKeyboard() *telebot.ReplyMarkup {
 	}
 	return keyboard
 }
+
+func getUpdateFieldKeyboard() *telebot.ReplyMarkup {
+	keyboard := &telebot.ReplyMarkup{
+		InlineKeyboard: [][]telebot.InlineButton{
+			{
+				telebot.InlineButton{
+					Text:   "Имя",
+					Unique: "get_update",
+					Data:   "name",
+				},
+				telebot.InlineButton{
+					Text:   "Удалить",
+					Unique: "get_update",
+					Data:   "sex",
+				},
+				telebot.InlineButton{
+					Text:   "Удалить",
+					Unique: "get_update",
+					Data:   "age",
+				},
+				telebot.InlineButton{
+					Text:   "Удалить",
+					Unique: "get_update",
+					Data:   "course",
+				},
+			},
+		},
+	}
+	return keyboard
+}
+
 func deleteSuccessKeyboard() *telebot.ReplyMarkup {
 	keyboard := &telebot.ReplyMarkup{
 		InlineKeyboard: [][]telebot.InlineButton{

@@ -14,8 +14,8 @@ func (b *Bot) RegisterHandlers() {
 	b.Handle("/create", b.createHandler)
 	b.Handle(&telebot.Btn{Unique: "create_sex"}, b.createSexHandler)
 	b.Handle("/get", b.getHandler)
+	b.Handle(&telebot.Btn{Unique: "get_update"}, b.deleteYesHandler)
 	b.Handle("/get_all", b.getAllHandler)
-	b.Handle("/update", b.updateHandler)
 	b.Handle("/delete", b.deleteHandler)
 	b.Handle(&telebot.Btn{Unique: "delete_yes"}, b.deleteYesHandler)
 	b.Handle(&telebot.Btn{Unique: "delete_no"}, b.deleteNoHandler)
@@ -95,10 +95,10 @@ func (b *Bot) createHandler(c telebot.Context) error {
 }
 
 func (b *Bot) createNameHandler(c telebot.Context) error {
-	studentName := c.Text()
-	if studentName == "" {
+	studentName, err := studentNameValidation(c.Text())
+	if err != nil {
 		return c.Send(
-			"Текст не найден, отправьте ещё раз",
+			err.Error(),
 			&telebot.SendOptions{
 				DisableWebPagePreview: false,
 				ParseMode:             telebot.ModeHTML,
@@ -119,22 +119,22 @@ func (b *Bot) createNameHandler(c telebot.Context) error {
 		&telebot.SendOptions{
 			DisableWebPagePreview: false,
 			ParseMode:             telebot.ModeHTML,
-			ReplyMarkup:           createSexKeyboard(),
+			ReplyMarkup:           createSexKeyboard("create_sex"),
 		},
 	)
 }
 
 func (b *Bot) createSexHandler(c telebot.Context) error {
-	studentSex := c.Callback().Data
-
-	if studentSex != "man" && studentSex != "woman" {
-		return c.Send(
+	studentSex, err := studentSexValidation(c.Callback().Data)
+	if err != nil {
+		c.Send(
 			"Произошла ошибка, обратитесь в тех. Поддержку",
 			&telebot.SendOptions{
 				DisableWebPagePreview: false,
 				ParseMode:             telebot.ModeHTML,
 			},
 		)
+		return err
 	}
 
 	student := b.data[c.Chat().ID]
@@ -253,7 +253,7 @@ func (b *Bot) createCourseHandler(c telebot.Context) error {
 	)
 }
 
-// COMMAND GET
+// COMMAND GET/UPDATE
 
 const (
 	StudentGetIdState States = "student_get_id"
@@ -346,20 +346,6 @@ func (b *Bot) getAllHandler(c telebot.Context) error {
 			ParseMode:             telebot.ModeHTML,
 		},
 	)
-}
-
-// COMMAND UPDATE
-
-const (
-	StudentUpdateId     States = "student_update_id"
-	StudentUpdateName   States = "student_update_name"
-	StudentUpdateSex    States = "student_update_sex"
-	StudentUpdateAge    States = "student_update_age"
-	StudentUpdateCourse States = "student_update_course"
-)
-
-func (b *Bot) updateHandler(c telebot.Context) error {
-	return nil
 }
 
 // COMMAND DELETE

@@ -42,5 +42,6 @@ func (b *Bot) clearState(userId int64) {
 }
 
 func (b *Bot) clear(userId int64) {
-	delete(b.data, userId)
+	b.clearData(userId)
+	b.clearState(userId)
 }
