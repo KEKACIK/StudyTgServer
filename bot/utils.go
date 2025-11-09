@@ -1,6 +1,12 @@
 package bot
 
-import "gopkg.in/telebot.v3"
+import (
+	"StudyTgServer/api"
+	"StudyTgServer/utils"
+	"fmt"
+
+	"gopkg.in/telebot.v3"
+)
 
 func (b *Bot) SetCommands() error {
 	commands := []telebot.Command{
@@ -21,15 +27,23 @@ func (b *Bot) SetCommands() error {
 			Description: "Получить всех студентов",
 		},
 		{
-			Text:        "update",
-			Description: "Обновить студента по ID",
-		},
-		{
 			Text:        "delete",
 			Description: "Удалить студента по ID",
 		},
 	}
 	return b.Bot.SetCommands(commands)
+}
+
+// Student
+
+func (b *Bot) getStudentText(student api.StudyApiStudent) string {
+	return utils.MultiLine(
+		fmt.Sprintf("ID: <b><i>%d</i></b>", student.ID),
+		fmt.Sprintf("Имя: <b><i>%s</i></b>", student.Name),
+		fmt.Sprintf("Пол: <b><i>%s</i></b>", api.FormatSexToRu(student.Sex)),
+		fmt.Sprintf("Возраст: <b><i>%d</i></b>", student.Age),
+		fmt.Sprintf("Курс: <b><i>%d</i></b>", student.Course),
+	)
 }
 
 // Clear

@@ -7,6 +7,12 @@ import (
 )
 
 const (
+	StudyStudentAgeMin = 14
+	StudyStudentAgeMax = 80
+
+	StudyStudentCourseMin = 1
+	StudyStudentCourseMax = 6
+
 	StudyStudentSexMan   = "man"
 	StudyStudentSexWoman = "woman"
 )

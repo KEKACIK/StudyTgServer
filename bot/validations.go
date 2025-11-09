@@ -3,6 +3,7 @@ package bot
 import (
 	"StudyTgServer/api"
 	"fmt"
+	"strconv"
 )
 
 func studentNameValidation(name string) (string, error) {
@@ -14,13 +15,35 @@ func studentNameValidation(name string) (string, error) {
 
 func studentSexValidation(sex string) (string, error) {
 	if sex != api.StudyStudentSexMan && sex != api.StudyStudentSexWoman {
-		return "", fmt.Errorf("sex field not '%s' or '%s' keyboard error.", api.StudyStudentSexMan, api.StudyStudentSexWoman)
+		return "", fmt.Errorf("keyboard error. sex field should be %s or %s", api.StudyStudentSexMan, api.StudyStudentSexWoman)
 	}
 	return sex, nil
 }
-func studentAgeValidation(sex string) (int64, error) {
-	return 0, nil
+
+func studentAgeValidation(ageStr string) (int, error) {
+	age, err := strconv.Atoi(ageStr)
+	if err != nil {
+		return 0, fmt.Errorf("ID должен быть числовым, отправьте ещё раз")
+	}
+	if age < api.StudyStudentAgeMin {
+		return 0, fmt.Errorf("возраст должен быть больше %d, отправьте ещё раз", api.StudyStudentAgeMin)
+	}
+	if age > api.StudyStudentAgeMax {
+		return 0, fmt.Errorf("возраст должен быть меньше %d, отправьте ещё раз", api.StudyStudentAgeMax)
+	}
+	return age, nil
 }
-func studentCourseValidation(sex string) (int64, error) {
-	return 0, nil
+
+func studentCourseValidation(courseStr string) (int, error) {
+	course, err := strconv.Atoi(courseStr)
+	if err != nil {
+		return 0, fmt.Errorf("курс должен быть числовым, отправьте ещё раз")
+	}
+	if course < api.StudyStudentCourseMin {
+		return 0, fmt.Errorf("курс должен быть больше %d, отправьте ещё раз", api.StudyStudentCourseMin)
+	}
+	if course > api.StudyStudentCourseMax {
+		return 0, fmt.Errorf("курс должен быть меньше %d, отправьте ещё раз", api.StudyStudentCourseMax)
+	}
+	return course, nil
 }
