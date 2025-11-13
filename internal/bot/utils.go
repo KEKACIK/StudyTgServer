@@ -1,8 +1,8 @@
 package bot
 
 import (
-	"StudyTgServer/api"
-	"StudyTgServer/utils"
+	"StudyTgServer/internal/api"
+	"StudyTgServer/tools"
 	"fmt"
 
 	"gopkg.in/telebot.v3"
@@ -37,7 +37,7 @@ func (b *Bot) SetCommands() error {
 // Student
 
 func (b *Bot) getStudentText(student api.StudyApiStudent) string {
-	return utils.MultiLine(
+	return tools.MultiLine(
 		fmt.Sprintf("ID: <b><i>%d</i></b>", student.ID),
 		fmt.Sprintf("Имя: <b><i>%s</i></b>", student.Name),
 		fmt.Sprintf("Пол: <b><i>%s</i></b>", api.FormatSexToRu(student.Sex)),

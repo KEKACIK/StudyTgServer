@@ -9,9 +9,11 @@ import (
 )
 
 type Config struct {
-	StudyApiHost string
-	StudyApiPort int64
-	BotToken     string
+	ApiHost  string
+	ApiPort  int64
+	ApiToken string
+
+	BotToken string
 }
 
 func Load() *Config {
@@ -19,9 +21,11 @@ func Load() *Config {
 		log.Print("No .env file found")
 	}
 	return &Config{
-		StudyApiHost: getRequiredStringEnv("STUDY_API_HOST"),
-		StudyApiPort: getRequiredIntegerEnv("STUDY_API_PORT"),
-		BotToken:     getRequiredStringEnv("BOT_TOKEN"),
+		ApiHost:  getRequiredStringEnv("API_HOST"),
+		ApiPort:  getRequiredIntegerEnv("API_PORT"),
+		ApiToken: getRequiredStringEnv("API_TOKEN"),
+
+		BotToken: getRequiredStringEnv("BOT_TOKEN"),
 	}
 }
 

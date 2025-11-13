@@ -1,7 +1,7 @@
 package bot
 
 import (
-	"StudyTgServer/api"
+	"StudyTgServer/internal/api"
 	"fmt"
 	"time"
 

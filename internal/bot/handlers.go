@@ -1,8 +1,8 @@
 package bot
 
 import (
-	"StudyTgServer/api"
-	"StudyTgServer/utils"
+	"StudyTgServer/internal/api"
+	"StudyTgServer/tools"
 	"fmt"
 	"strconv"
 
@@ -59,7 +59,7 @@ func (b *Bot) textHandler(c telebot.Context) error {
 
 func (b *Bot) startHandler(c telebot.Context) error {
 	return c.Send(
-		utils.MultiLine(
+		tools.MultiLine(
 			"Добро пожаловать в <b>StudyTgBot</b>",
 			"",
 			"Вот список команд для использования бота",
@@ -88,7 +88,7 @@ func (b *Bot) createHandler(c telebot.Context) error {
 	b.states[c.Chat().ID] = CreateNameState
 	b.data[c.Chat().ID] = api.StudyApiStudent{}
 	return c.Send(
-		utils.MultiLine(
+		tools.MultiLine(
 			"Создание студента",
 			"",
 			"Пришлите <b>Имя</b> студента",
@@ -117,7 +117,7 @@ func (b *Bot) createNameHandler(c telebot.Context) error {
 	b.data[c.Chat().ID] = student
 
 	return c.Send(
-		utils.MultiLine(
+		tools.MultiLine(
 			"Создание студента",
 			"",
 			"Выберите <b>Пол</b> студента",
@@ -148,7 +148,7 @@ func (b *Bot) createSexHandler(c telebot.Context) error {
 	b.data[c.Chat().ID] = student
 	b.states[c.Chat().ID] = CreateAgeState
 	return c.Edit(
-		utils.MultiLine(
+		tools.MultiLine(
 			"Создание студента",
 			"",
 			"Пришлите <b>Возраст</b> студента",
@@ -178,7 +178,7 @@ func (b *Bot) createAgeHandler(c telebot.Context) error {
 	b.states[c.Chat().ID] = CreateCourseState
 
 	return c.Send(
-		utils.MultiLine(
+		tools.MultiLine(
 			"Создание студента",
 			"",
 			"Пришлите <b>Курс</b> студента",
@@ -235,7 +235,7 @@ const (
 func (b *Bot) getHandler(c telebot.Context) error {
 	b.states[c.Chat().ID] = GetIdState
 	return c.Send(
-		utils.MultiLine(
+		tools.MultiLine(
 			"Получение студента по ID",
 			"",
 			"Пришлите ID студента",
@@ -290,7 +290,7 @@ func (b *Bot) getUpdateHandler(c telebot.Context) error {
 
 	switch c.Callback().Data {
 	case "name":
-		text = utils.MultiLine(
+		text = tools.MultiLine(
 			text,
 			fmt.Sprintf("Имя: <b><i>%s</i></b>", student.Name),
 			"",
@@ -298,7 +298,7 @@ func (b *Bot) getUpdateHandler(c telebot.Context) error {
 		)
 		b.states[c.Chat().ID] = GetUpdateNameState
 	case "sex":
-		text = utils.MultiLine(
+		text = tools.MultiLine(
 			text,
 			fmt.Sprintf("Пол: <b><i>%s</i></b>", api.FormatSexToRu(student.Sex)),
 			"",
@@ -306,7 +306,7 @@ func (b *Bot) getUpdateHandler(c telebot.Context) error {
 		)
 		replyMarkup = selectSexKeyboard("get_update_sex")
 	case "age":
-		text = utils.MultiLine(
+		text = tools.MultiLine(
 			text,
 			fmt.Sprintf("Возраст: <b><i>%d</i></b>", student.Age),
 			"",
@@ -314,7 +314,7 @@ func (b *Bot) getUpdateHandler(c telebot.Context) error {
 		)
 		b.states[c.Chat().ID] = GetUpdateAgeState
 	case "course":
-		text = utils.MultiLine(
+		text = tools.MultiLine(
 			text,
 			fmt.Sprintf("Курс: <b><i>%d</i></b>", student.Course),
 			"",
@@ -489,7 +489,7 @@ func (b *Bot) getAllHandler(c telebot.Context) error {
 
 	text := "Список студентов:\n"
 	for _, student := range students {
-		text = utils.MultiLine(
+		text = tools.MultiLine(
 			text,
 			fmt.Sprintf(
 				"ID: <b><i>%d</i></b>, Имя: <b><i>%s</i></b>, Пол: <b><i>%s</i></b>, Возраст: <b><i>%d</i></b>, Курс: <b><i>%d</i></b>",
@@ -517,7 +517,7 @@ func (b *Bot) deleteHandler(c telebot.Context) error {
 	b.states[c.Chat().ID] = DeleteIdState
 	b.data[c.Chat().ID] = api.StudyApiStudent{}
 	return c.Send(
-		utils.MultiLine(
+		tools.MultiLine(
 			"Удаление студента по ID",
 			"",
 			"Пришлите ID студента",
@@ -553,7 +553,7 @@ func (b *Bot) deleteIdHandler(c telebot.Context) error {
 	}
 	b.data[c.Chat().ID] = *student
 	c.Send(
-		utils.MultiLine(
+		tools.MultiLine(
 			fmt.Sprintf("ID: <b><i>%d</i></b>", student.ID),
 			fmt.Sprintf("Имя: <b><i>%s</i></b>", student.Name),
 			fmt.Sprintf("Пол: <b><i>%s</i></b>", api.FormatSexToRu(student.Sex)),
