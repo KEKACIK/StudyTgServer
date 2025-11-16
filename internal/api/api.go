@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 )
 
@@ -37,15 +38,23 @@ type StudyApiStudent struct {
 }
 
 type StudyApiServer struct {
-	Host string
-	Port int64
+	Host  string
+	Port  int64
+	token string
 }
 
-func NewStudyApiServer(host string, port int64) *StudyApiServer {
+func NewStudyApiServer(host string, port int64, token string) *StudyApiServer {
 	return &StudyApiServer{
-		Host: host,
-		Port: port,
+		Host:  host,
+		Port:  port,
+		token: token,
 	}
+}
+
+func (s *StudyApiServer) getHeader() *http.Header {
+	h := http.Header{}
+	h.Add("Authorization", fmt.Sprintf("Bearer %s", s.token))
+	return &h
 }
 
 func (s *StudyApiServer) Create(name, sex string, age, course int) (int64, error) {
@@ -56,6 +65,7 @@ func (s *StudyApiServer) Create(name, sex string, age, course int) (int64, error
 	}
 	r, err := requestPost(
 		url.String(),
+		*s.getHeader(),
 		map[string]interface{}{
 			"name":   name,
 			"sex":    sex,
@@ -80,7 +90,7 @@ func (s *StudyApiServer) Get(id int64) (*StudyApiStudent, error) {
 		Host:   fmt.Sprintf("%s:%d", s.Host, s.Port),
 		Path:   fmt.Sprintf("/student/%d", id),
 	}
-	r, err := requestGet(url.String())
+	r, err := requestGet(url.String(), *s.getHeader())
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +108,7 @@ func (s *StudyApiServer) GetAll() ([]StudyApiStudent, error) {
 		Host:   fmt.Sprintf("%s:%d", s.Host, s.Port),
 		Path:   "/student/list",
 	}
-	r, err := requestGet(url.String())
+	r, err := requestGet(url.String(), *s.getHeader())
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +128,7 @@ func (s *StudyApiServer) Update(id int64, name, sex string, age, course int) (*S
 	}
 	r, err := requestPut(
 		url.String(),
+		*s.getHeader(),
 		map[string]interface{}{
 			"name":   name,
 			"sex":    sex,
@@ -144,7 +155,7 @@ func (s *StudyApiServer) Delete(id int64) error {
 		Host:   fmt.Sprintf("%s:%d", s.Host, s.Port),
 		Path:   fmt.Sprintf("/student/%d", id),
 	}
-	_, err := requestDelete(url.String())
+	_, err := requestDelete(url.String(), *s.getHeader())
 	return err
 }
 

@@ -8,7 +8,7 @@ import (
 
 func main() {
 	cfg := config.Load()
-	studyApi := api.NewStudyApiServer(cfg.ApiHost, cfg.ApiPort)
+	studyApi := api.NewStudyApiServer(cfg.ApiHost, cfg.ApiPort, cfg.ApiToken)
 
 	bot, err := bot.NewBot(cfg.BotToken, studyApi)
 	if err != nil {

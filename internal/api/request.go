@@ -17,29 +17,69 @@ func requestErrorUnpack(data []byte) (string, error) {
 	return result.Message, nil
 }
 
-func requestGet(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+func requestErrorDetect(resp *http.Response, body []byte) error {
+	if resp.StatusCode == 400 {
+		errorMessage, err := requestErrorUnpack(body)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("request error, status code %d: %s", resp.StatusCode, errorMessage)
+	}
+	if resp.StatusCode == 401 {
+		errorMessage, err := requestErrorUnpack(body)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("request auth error, status code %d: %s", resp.StatusCode, errorMessage)
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("request error, status code %d", resp.StatusCode)
+	}
+	return nil
+}
+
+func requestGet(url string, header http.Header) ([]byte, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("request error: %v", err)
 	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("request error: status code %d", resp.StatusCode)
+
+	req.Header = header
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request error %v", err)
 	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read error: %v", err)
 	}
+
+	err = requestErrorDetect(resp, body)
+	if err != nil {
+		return nil, err
+	}
+
 	return body, nil
 }
 
-func requestPost(url string, data map[string]interface{}) ([]byte, error) {
+func requestPost(url string, header http.Header, data map[string]interface{}) ([]byte, error) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return nil, fmt.Errorf("data formatted to json error: %v", err)
 	}
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, fmt.Errorf("request error: %v", err)
+	}
+
+	req.Header = header
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request error %v", err)
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -47,21 +87,15 @@ func requestPost(url string, data map[string]interface{}) ([]byte, error) {
 		return nil, fmt.Errorf("read error: %v", err)
 	}
 
-	if resp.StatusCode == 400 {
-		errorMessage, err := requestErrorUnpack(body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("request error, status code %d: %s", resp.StatusCode, errorMessage)
-	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("request error, status code %d", resp.StatusCode)
+	err = requestErrorDetect(resp, body)
+	if err != nil {
+		return nil, err
 	}
 
 	return body, nil
 }
 
-func requestPut(url string, data map[string]interface{}) ([]byte, error) {
+func requestPut(url string, header http.Header, data map[string]interface{}) ([]byte, error) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return nil, fmt.Errorf("data formatted to json error: %v", err)
@@ -71,6 +105,8 @@ func requestPut(url string, data map[string]interface{}) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("request error: %v", err)
 	}
+
+	req.Header = header
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
@@ -83,24 +119,20 @@ func requestPut(url string, data map[string]interface{}) ([]byte, error) {
 		return nil, fmt.Errorf("read error: %v", err)
 	}
 
-	if resp.StatusCode == 400 {
-		errorMessage, err := requestErrorUnpack(body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("request error, status code %d: %s", resp.StatusCode, errorMessage)
-	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("request error, status code %d", resp.StatusCode)
+	err = requestErrorDetect(resp, body)
+	if err != nil {
+		return nil, err
 	}
 
 	return body, nil
 }
-func requestDelete(url string) ([]byte, error) {
+func requestDelete(url string, header http.Header) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("request error: %v", err)
 	}
+
+	req.Header = header
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -112,15 +144,9 @@ func requestDelete(url string) ([]byte, error) {
 		return nil, fmt.Errorf("read error: %v", err)
 	}
 
-	if resp.StatusCode == 400 {
-		errorMessage, err := requestErrorUnpack(body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("request error, status code %d: %s", resp.StatusCode, errorMessage)
-	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("request error, status code %d", resp.StatusCode)
+	err = requestErrorDetect(resp, body)
+	if err != nil {
+		return nil, err
 	}
 
 	return body, nil
