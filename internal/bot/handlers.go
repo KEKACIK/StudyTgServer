@@ -10,16 +10,22 @@ import (
 )
 
 func (b *Bot) RegisterHandlers() {
+	// start
 	b.Handle("/start", b.startHandler)
+	// create
 	b.Handle("/create", b.createHandler)
 	b.Handle(&telebot.Btn{Unique: "create_sex"}, b.createSexHandler)
+	// get
 	b.Handle("/get", b.getHandler)
 	b.Handle(&telebot.Btn{Unique: "get_update"}, b.getUpdateHandler)
 	b.Handle(&telebot.Btn{Unique: "get_update_sex"}, b.getUpdateSexHandler)
+	// get all
 	b.Handle("/get_all", b.getAllHandler)
+	// delete
 	b.Handle("/delete", b.deleteHandler)
 	b.Handle(&telebot.Btn{Unique: "delete_yes"}, b.deleteYesHandler)
 	b.Handle(&telebot.Btn{Unique: "delete_no"}, b.deleteNoHandler)
+	// call
 	b.Handle(telebot.OnText, b.textHandler)
 }
 
@@ -52,6 +58,7 @@ func (b *Bot) textHandler(c telebot.Context) error {
 	case DeleteIdState:
 		return b.deleteIdHandler(c)
 	}
+
 	return nil
 }
 
@@ -101,7 +108,9 @@ func (b *Bot) createHandler(c telebot.Context) error {
 }
 
 func (b *Bot) createNameHandler(c telebot.Context) error {
-	studentName, err := studentNameValidation(c.Text())
+	studentName := c.Text()
+
+	err := NameValidation(studentName)
 	if err != nil {
 		return c.Send(
 			err.Error(),
@@ -131,7 +140,9 @@ func (b *Bot) createNameHandler(c telebot.Context) error {
 }
 
 func (b *Bot) createSexHandler(c telebot.Context) error {
-	studentSex, err := studentSexValidation(c.Callback().Data)
+	studentSex := c.Callback().Data
+
+	err := SexValidation(studentSex)
 	if err != nil {
 		c.Send(
 			"Произошла ошибка, обратитесь в тех. Поддержку",
@@ -161,7 +172,18 @@ func (b *Bot) createSexHandler(c telebot.Context) error {
 }
 
 func (b *Bot) createAgeHandler(c telebot.Context) error {
-	studentAge, err := studentAgeValidation(c.Text())
+	studentAge, err := Str2IntValidation(c.Text())
+	if err != nil {
+		return c.Send(
+			err.Error(),
+			&telebot.SendOptions{
+				DisableWebPagePreview: false,
+				ParseMode:             telebot.ModeHTML,
+			},
+		)
+	}
+
+	err = AgeValidation(studentAge)
 	if err != nil {
 		return c.Send(
 			err.Error(),
@@ -191,7 +213,18 @@ func (b *Bot) createAgeHandler(c telebot.Context) error {
 }
 
 func (b *Bot) createCourseHandler(c telebot.Context) error {
-	studentCourse, err := studentAgeValidation(c.Text())
+	studentCourse, err := Str2IntValidation(c.Text())
+	if err != nil {
+		return c.Send(
+			err.Error(),
+			&telebot.SendOptions{
+				DisableWebPagePreview: false,
+				ParseMode:             telebot.ModeHTML,
+			},
+		)
+	}
+
+	err = AgeValidation(studentCourse)
 	if err != nil {
 		return c.Send(
 			err.Error(),
@@ -334,7 +367,9 @@ func (b *Bot) getUpdateHandler(c telebot.Context) error {
 }
 
 func (b *Bot) getUpdateNameHandler(c telebot.Context) error {
-	studentName, err := studentNameValidation(c.Text())
+	studentName := c.Text()
+
+	err := NameValidation(studentName)
 	if err != nil {
 		return c.Send(
 			err.Error(),
@@ -344,6 +379,7 @@ func (b *Bot) getUpdateNameHandler(c telebot.Context) error {
 			},
 		)
 	}
+
 	student := b.data[c.Chat().ID]
 	studentNew, err := b.api.Update(
 		student.ID,
@@ -368,7 +404,9 @@ func (b *Bot) getUpdateNameHandler(c telebot.Context) error {
 }
 
 func (b *Bot) getUpdateSexHandler(c telebot.Context) error {
-	studentSex, err := studentSexValidation(c.Callback().Data)
+	studentSex := c.Callback().Data
+
+	err := SexValidation(studentSex)
 	if err != nil {
 		c.Edit(
 			"Произошла ошибка, обратитесь в тех. Поддержку",
@@ -403,7 +441,18 @@ func (b *Bot) getUpdateSexHandler(c telebot.Context) error {
 }
 
 func (b *Bot) getUpdateAgeHandler(c telebot.Context) error {
-	studentAge, err := studentAgeValidation(c.Text())
+	studentAge, err := Str2IntValidation(c.Text())
+	if err != nil {
+		return c.Send(
+			err.Error(),
+			&telebot.SendOptions{
+				DisableWebPagePreview: false,
+				ParseMode:             telebot.ModeHTML,
+			},
+		)
+	}
+
+	err = AgeValidation(studentAge)
 	if err != nil {
 		return c.Send(
 			err.Error(),
@@ -437,7 +486,18 @@ func (b *Bot) getUpdateAgeHandler(c telebot.Context) error {
 }
 
 func (b *Bot) getUpdateCourseHandler(c telebot.Context) error {
-	studentCourse, err := studentCourseValidation(c.Text())
+	studentCourse, err := Str2IntValidation(c.Text())
+	if err != nil {
+		return c.Send(
+			err.Error(),
+			&telebot.SendOptions{
+				DisableWebPagePreview: false,
+				ParseMode:             telebot.ModeHTML,
+			},
+		)
+	}
+
+	err = CourseValidation(studentCourse)
 	if err != nil {
 		return c.Send(
 			err.Error(),

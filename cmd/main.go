@@ -4,9 +4,12 @@ import (
 	"StudyTgServer/config"
 	"StudyTgServer/internal/api"
 	"StudyTgServer/internal/bot"
+	"fmt"
 )
 
 func main() {
+	fmt.Println()
+
 	cfg := config.Load()
 	studyApi := api.NewStudyApiServer(cfg.ApiHost, cfg.ApiPort, cfg.ApiToken)
 

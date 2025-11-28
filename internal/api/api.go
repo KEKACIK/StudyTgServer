@@ -8,14 +8,17 @@ import (
 )
 
 const (
-	StudyStudentAgeMin = 14
-	StudyStudentAgeMax = 80
+	StudyStudentMinName = 2
+	StudyStudentMaxName = 32
 
-	StudyStudentCourseMin = 1
-	StudyStudentCourseMax = 6
+	StudyStudentMinAge = 16
+	StudyStudentMaxAge = 85
 
 	StudyStudentSexMan   = "man"
 	StudyStudentSexWoman = "woman"
+
+	StudyStudentMinCourse = 1
+	StudyStudentMaxCourse = 6
 )
 
 type StudyErrorResult struct {
